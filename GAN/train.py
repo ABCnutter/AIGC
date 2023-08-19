@@ -1,31 +1,32 @@
 # 导入软件包
-import random
-import math
-import time
-import pandas as pd
-import numpy as np
-from PIL import Image
-import os
 
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), ".")))
+import time
+from PIL import Image
 import torch
 import torch.utils.data as data
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 
 from torchvision import transforms
-from model import Generator, Discriminator
+from model.DCGAN import Generator, Discriminator
 from matplotlib import pyplot as plt
 
 
 def make_datapath_list(root):
-    train_image_list = os.listdir(root)
-    file_full_path_list = []
-    for filename in train_image_list:
-        file_full_path = os.path.join(root, filename)
-        file_full_path_list.append(file_full_path)
+    """创建用于学习和验证的图像数据及标注数据的文件路径列表。 """
 
-    return file_full_path_list
+    train_img_list = list() #保存图像文件的路径
+
+    for img_idx in range(200):
+        img_path = f"{root}/img_7_{str(img_idx)}.jpg"
+        train_img_list.append(img_path)
+
+        img_path = f"{root}/img_8_{str(img_idx)}.jpg"
+        train_img_list.append(img_path)
+
+    return train_img_list
 
 
 class ImageTransform:
@@ -66,7 +67,7 @@ class GAN_Img_Dataset(data.Dataset):
 # 创建DataLoader并确认执行结果
 
 # 创建文件列表
-root = "./gan_generation/data/cracks"
+root = "./img_78"
 train_img_list = make_datapath_list(root)
 
 # 创建Dataset
@@ -101,7 +102,7 @@ def weights_init(m):
         nn.init.constant_(m.bias.data, 0)
 
 
-G = Generator(z_dim=20, image_size=256)
+G = Generator(z_dim=20, image_size=64)
 D = Discriminator(z_dim=20, image_size=64)
 # 开始初始化
 G.apply(weights_init)
@@ -129,7 +130,7 @@ def train_model(G, D, dataloader, num_epochs):
 
     # 使用硬编码的参数
     z_dim = 20
-    mini_batch_size = 2
+    mini_batch_size = 8
 
     # 将网络载入GPU中
     G.to(device)
